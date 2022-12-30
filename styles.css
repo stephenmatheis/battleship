@@ -1,4 +1,6 @@
-* {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -6,10 +8,18 @@ body {
     margin: 0px;
     padding: 0px;
     font-family: sans-serif;
+    position: relative;
 }
 
-h1 {
-    margin-top: 0px;
+body.grabbing * {
+    cursor: grabbing !important;
+}
+
+h1,
+h2 {
+    margin: 0px;
+    text-align: center;
+    user-select: none;
 }
 
 #app {
@@ -17,12 +27,12 @@ h1 {
     width: 100vw;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
     padding: 10px;
 }
 
+/* Game Board */
 #game-board {
+    margin-top: 10px;
     flex: 1;
     display: grid;
     grid-template-columns: repeat(11, 1fr);
@@ -37,7 +47,11 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25em;
+    user-select: none;
+}
+
+.square.is-overlapped {
+    background-color: red;
 }
 
 .square.legend {
@@ -47,4 +61,84 @@ h1 {
 .square.legend.corner {
     background-color: transparent;
     color: transparent;
+}
+
+/* Ships */
+#ships-ctr {
+    margin-top: 10px;
+}
+
+#ships {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.ship {
+    text-align: center;
+    cursor: pointer;
+    margin: 10px;
+    position: relative;
+}
+
+.hits {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: dimgray;
+    color: whitesmoke;
+}
+
+.name {
+    margin-top: 4px;
+    font-size: 12px;
+    user-select: none;
+}
+
+.ship.is-dragging .hits {
+    background-color: lightgray;
+}
+
+.ship.is-dragging .name {
+    color: lightgray;
+}
+
+.ship.is-dragged {
+    user-select: none;
+    position: absolute;
+    z-index: 1000;
+}
+
+.ship.is-dragged.return {
+    transition: top 200ms ease-in-out,
+        left 200ms ease-in-out;
+}
+
+.ship.is-dragged.scale .hits {
+    transform: scale(1.2);
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+}
+
+.ship.is-dragged .name {
+    display: none;
+}
+
+.ship.is-dragged .hits {
+    box-shadow: 0px 0px 0px 0px transparent;
+    transition: transform 200ms ease-in-out;
+}
+
+.pip {
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    background-color: whitesmoke;
+}
+
+.pip:not(:last-child) {
+    margin-right: 6px;
 }

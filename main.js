@@ -1,66 +1,237 @@
-// Set up game board
-const gameBoard = document.querySelector("#game-board");
-const squares = [
+import isShipOnSquare from './utils/isShipOnSquare.js';
+
+// Get Game Board and Ships nodes
+const gameBoard = document.querySelector('#game-board');
+const shipsContainer = document.querySelector('#ships');
+
+// Main Data Structure
+const data = [
     {
         row: 0,
-        squares: [0, "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"],
+        squares: [0, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
     },
     {
-        row: "A",
-        squares: [1, "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
+        row: 1,
+        squares: [1, '', '', '', '', '', '', '', '', '', ''],
     },
     {
-        row: "B",
-        squares: [2, "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
+        row: 2,
+        squares: [2, '', '', '', '', '', '', '', '', '', ''],
     },
     {
-        row: "C",
-        squares: [3, "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
+        row: 3,
+        squares: [3, '', '', '', '', '', '', '', '', '', ''],
     },
     {
-        row: "D",
-        squares: [4, "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
+        row: 4,
+        squares: [4, '', '', '', '', '', '', '', '', '', ''],
     },
     {
-        row: "E",
-        squares: [5, "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
+        row: 5,
+        squares: [5, '', '', '', '', '', '', '', '', '', ''],
     },
     {
-        row: "F",
-        squares: [6, "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
+        row: 6,
+        squares: [6, '', '', '', '', '', '', '', '', '', ''],
     },
     {
-        row: "G",
-        squares: [7, "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
+        row: 7,
+        squares: [7, '', '', '', '', '', '', '', '', '', ''],
     },
     {
-        row: "H",
-        squares: [8, "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
+        row: 8,
+        squares: [8, '', '', '', '', '', '', '', '', '', ''],
     },
     {
-        row: "I",
-        squares: [9, "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
+        row: 9,
+        squares: [9, '', '', '', '', '', '', '', '', '', ''],
     },
     {
-        row: "J",
-        squares: [10, "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
+        row: 10,
+        squares: [10, '', '', '', '', '', '', '', '', '', ''],
     },
 ];
 
-squares.forEach(({ row, squares }) => {
-    squares.forEach((square) => {
-        let className =
-            typeof row === "number" || typeof square === "number"
-                ? " legend"
-                : "";
+// Legend
+const legend = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 
-        className += square === 0 ? " corner" : "";
+// Ships
+const ships = [
+    {
+        name: 'Carrier',
+        hits: 5,
+    },
+    {
+        name: 'Battleship',
+        hits: 4,
+    },
+    {
+        name: 'Destoyer',
+        hits: 3,
+    },
+    {
+        name: 'Submarine',
+        hits: 3,
+    },
+    {
+        name: 'Patrol Boat',
+        hits: 2,
+    },
+];
+
+// Set up squares
+data.forEach(({ row, squares }) => {
+    squares.forEach((square, index) => {
+        let className =
+            row === 0 || typeof square === 'number'
+                ? ' legend'
+                : '';
+
+        className += square === 0 ? ' corner' : '';
 
         gameBoard.insertAdjacentHTML(
-            "beforeend",
+            'beforeend',
             /*html*/ `
-                <div class="square${className}">${square}</div>
+                <div class='square${className}' data-square='${legend[index]}${row}'>${square}</div>
             `
         );
     });
 });
+
+// Set up ships
+ships.forEach(({ name, hits }) => {
+    const pips = [...Array(hits).keys()]
+        .map((hit) => {
+            return /*html*/ `
+                <div class='pip'></div>
+            `;
+        })
+        .join('\n');
+
+    shipsContainer.insertAdjacentHTML(
+        'beforeend',
+        /*html*/ `
+            <div class='ship' data-name='${name}'>
+                <div class='hits'>
+                    ${pips}
+                </div>
+                <div class='name'>${name}</div>
+            </div>
+        `
+    );
+});
+
+// Drag and Drop
+let offsetX = 10;
+let offsetY = 10;
+let sourceElement;
+let targetElement;
+let shipName;
+
+const items = document.querySelectorAll('.ship');
+const gameSquares = document.querySelectorAll('.square:not(.legend)');
+
+items.forEach(item => {
+    item.addEventListener('mousedown', mousedown);
+    item.addEventListener('mouseup', mouseup);
+});
+
+function mousedown(event) {
+    sourceElement = this;
+
+    // Clone element
+    targetElement = sourceElement.cloneNode(true);
+    targetElement.classList.add('is-dragged');
+
+    // Set name
+    shipName = targetElement.dataset.name;
+
+    // Style entire document
+    document.body.classList.add('grabbing');
+
+    // Insert cloned element
+    document.body.insertAdjacentElement('beforeend', targetElement);
+
+    // Set position
+    const { top, left, width } = sourceElement.getBoundingClientRect();
+
+    targetElement.style.width = `${width}px`;
+    targetElement.style.top = `${top - offsetY}px`;
+    targetElement.style.left = `${left - offsetX}px`;
+
+    // Add event listeners
+    document.addEventListener('mousemove', mousemove);
+    window.addEventListener('mouseup', mouseup);
+}
+
+function mouseup(event) {
+    // Remove event listeners
+    document.removeEventListener('mousemove', mousemove);
+    window.addEventListener('mouseup', mouseup);
+
+    // Remove scale class from target element
+    targetElement.classList.remove('scale');
+
+    // Add return class to target element
+    targetElement.classList.add('return');
+
+    // Return target element to source element's position
+    const { top, left } = sourceElement.getBoundingClientRect();
+
+    targetElement.style.top = `${top - offsetY}px`;
+    targetElement.style.left = `${left - offsetX}px`;
+
+    // Wait until the return animation has completed
+    setTimeout(() => {
+        // Remove the target element from the DOM
+        targetElement.remove();
+
+        // Remove classes
+        sourceElement.classList.remove('is-dragging');
+        document.body.classList.remove('grabbing');
+
+        // Reset data
+        sourceElement = undefined;
+        targetElement = undefined;
+        shipName = undefined;
+    }, 200);
+
+    // TODO: Add ship to Game Board
+}
+
+function mousemove(event) {
+    // Set is-dragging class on source element
+    if (!sourceElement.classList.contains('is-dragging')) {
+        sourceElement.classList.add('is-dragging');
+    }
+
+    // Set scale class on target element
+    if (!targetElement.classList.contains('scale')) {
+        targetElement.classList.add('scale');
+    }
+
+    // Set new target top and left position based on mouse x y position
+    targetElement.style.top = `${targetElement.getBoundingClientRect().top + event.movementY - offsetY}px`;
+    targetElement.style.left = `${targetElement.getBoundingClientRect().left + event.movementX - offsetX}px`;
+
+    checkCollision();
+}
+
+function checkCollision() {
+    [...gameSquares].forEach(square => {
+        const overlaps = isShipOnSquare(targetElement, square);
+
+        if (overlaps) {
+            if (!square.classList.contains('is-overlapped')) {
+                console.log(square.dataset.square, 'overlaps');
+                square.classList.add('is-overlapped');
+            }
+        } else {
+            square.classList.remove('is-overlapped');
+        }
+    });
+}
+
+async function onDrop(event) {
+    console.log(event);
+}
