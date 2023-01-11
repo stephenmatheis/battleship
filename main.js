@@ -66,7 +66,7 @@ const ships = [
         hits: 4,
     },
     {
-        name: 'Destoyer',
+        name: 'Destroyer',
         hits: 3,
     },
     {
@@ -103,7 +103,9 @@ ships.forEach(({ name, hits }) => {
     const pips = [...Array(hits).keys()]
         .map((hit) => {
             return /*html*/ `
-                <div class='pip'></div>
+                <div class='pip-ctr'>
+                    <div class='pip'></div>
+                </div>
             `;
         })
         .join('\n');
@@ -127,6 +129,8 @@ let offsetY = 10;
 let sourceElement;
 let targetElement;
 let shipName;
+let overlapped;
+let nextSquares = [];
 
 const items = document.querySelectorAll('.ship');
 const gameSquares = document.querySelectorAll('.square:not(.legend)');
@@ -165,21 +169,34 @@ function mousedown(event) {
 }
 
 function mouseup(event) {
+    // Remove selected squares
+    for (let square of [...gameSquares]) {
+        square.classList.remove('is-overlapped');
+    }
+
+    // Remove next square class
+    if (nextSquares.length) {
+        nextSquares.forEach(square => square.classList.remove('is-next-square'));
+        nextSquares = [];
+    }
+
     // Remove event listeners
     document.removeEventListener('mousemove', mousemove);
     window.addEventListener('mouseup', mouseup);
 
-    // Remove scale class from target element
-    targetElement.classList.remove('scale');
+    if (targetElement) {
+        // Remove scale class from target element
+        targetElement.classList.remove('scale');
 
-    // Add return class to target element
-    targetElement.classList.add('return');
+        // Add return class to target element
+        targetElement.classList.add('return');
 
-    // Return target element to source element's position
-    const { top, left } = sourceElement.getBoundingClientRect();
+        // Return target element to source element's position
+        const { top, left } = sourceElement.getBoundingClientRect();
 
-    targetElement.style.top = `${top - offsetY}px`;
-    targetElement.style.left = `${left - offsetX}px`;
+        targetElement.style.top = `${top - offsetY}px`;
+        targetElement.style.left = `${left - offsetX}px`;
+    }
 
     // Wait until the return animation has completed
     setTimeout(() => {
@@ -214,22 +231,63 @@ function mousemove(event) {
     targetElement.style.top = `${targetElement.getBoundingClientRect().top + event.movementY - offsetY}px`;
     targetElement.style.left = `${targetElement.getBoundingClientRect().left + event.movementX - offsetX}px`;
 
-    checkCollision();
+    // if (!overlapped) {
+    //     checkWhichSquaresShipIsOn();
+    // }
+
+    checkWhichSquaresShipIsOn();
 }
 
-function checkCollision() {
-    [...gameSquares].forEach(square => {
+function checkWhichSquaresShipIsOn() {
+    for (let square of [...gameSquares]) {
         const overlaps = isShipOnSquare(targetElement, square);
 
         if (overlaps) {
             if (!square.classList.contains('is-overlapped')) {
-                console.log(square.dataset.square, 'overlaps');
-                square.classList.add('is-overlapped');
+                if (!overlapped) {
+                    console.log(square.dataset.square, 'is overlapped');
+                    square.classList.add('is-overlapped');
+                    overlapped = square.dataset.square;
+
+                    // Overlap the next n number of squares to the right
+                    // where n is the number of hits the boat can take
+                    // Get ship object in object array where shipname equals selecte ship name
+                    // Get next square to the right
+                    const { hits } = ships.find(ship => ship.name === shipName);
+                    const [col, row] = overlapped.match(/[A-Z]+|[0-9]+/g);
+
+                    // console.log(col, row);
+
+                    for (let i = 0; i < hits - 1; i++) {
+                        // console.log(nextCol);
+
+                        const nextCol = legend[legend.indexOf(col) + 1 + i];
+                        const nextSquare = document.querySelector(`.square[data-square='${nextCol}${row}']`);
+
+                        console.log(nextSquare);
+
+                        if (nextSquare) {
+                            nextSquare.classList.add('is-next-square');
+                            nextSquares.push(nextSquare);
+                        }
+                    }
+                }
             }
         } else {
             square.classList.remove('is-overlapped');
+
+            if (overlapped === square.dataset.square) {
+                console.log(overlapped, 'is no longer overlapped');
+                overlapped = undefined;
+
+                if (nextSquares.length) {
+                    nextSquares.forEach(square => square.classList.remove('is-next-square'));
+
+                    nextSquares = [];
+                }
+            }
         }
-    });
+    }
 }
 
 async function onDrop(event) {

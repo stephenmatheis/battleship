@@ -27,6 +27,8 @@ h2 {
     width: 100vw;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
     padding: 10px;
 }
 
@@ -35,11 +37,9 @@ h2 {
     margin-top: 10px;
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(11, 1fr);
-    grid-template-rows: repeat(11, 1fr);
+    grid-template-columns: repeat(11, 5vh);
+    grid-template-rows: repeat(11, 5vh);
     grid-gap: 10px;
-    height: 100%;
-    width: 100%;
 }
 
 .square {
@@ -51,7 +51,11 @@ h2 {
 }
 
 .square.is-overlapped {
-    background-color: red;
+    background-color: blue;
+}
+
+.square.is-next-square {
+    background-color: green;
 }
 
 .square.legend {
@@ -87,7 +91,7 @@ h2 {
     display: flex;
     justify-content: center;
     width: 100%;
-    padding: 6px 12px;
+    padding: 5px;
     border-radius: 6px;
     background-color: dimgray;
     color: whitesmoke;
@@ -119,7 +123,6 @@ h2 {
 }
 
 .ship.is-dragged.scale .hits {
-    transform: scale(1.2);
     box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
 }
 
@@ -132,13 +135,21 @@ h2 {
     transition: transform 200ms ease-in-out;
 }
 
+.pip-ctr {
+    height: calc(2.5vh);
+    width: calc(5vh);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .pip {
-    height: 12px;
-    width: 12px;
+    height: calc(2vh);
+    width: calc(2vh);
     border-radius: 50%;
     background-color: whitesmoke;
 }
 
-.pip:not(:last-child) {
-    margin-right: 6px;
+.pip-ctr:not(:last-child) {
+    margin-right: 10px;
 }
