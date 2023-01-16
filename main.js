@@ -123,6 +123,10 @@ ships.forEach(({ name, hits }) => {
     );
 });
 
+// // DEV: Mouse Flag
+// let isDragging = false;
+// // DEV:
+
 // Drag and Drop
 let offsetX = 10;
 let offsetY = 10;
@@ -141,6 +145,10 @@ items.forEach(item => {
 });
 
 function mousedown(event) {
+    // // 
+    // isDragging = true;
+    // //
+
     sourceElement = this;
 
     // Clone element
@@ -169,6 +177,16 @@ function mousedown(event) {
 }
 
 function mouseup(event) {
+    // // DEV:
+    // if (!isDragging) {
+    //     isDragging = false;
+
+    //     return;
+    // }
+    // // DEV:
+
+    // return;
+
     // Remove selected squares
     for (let square of [...gameSquares]) {
         square.classList.remove('is-overlapped');
@@ -182,7 +200,7 @@ function mouseup(event) {
 
     // Remove event listeners
     document.removeEventListener('mousemove', mousemove);
-    window.addEventListener('mouseup', mouseup);
+    window.removeEventListener('mouseup', mouseup);
 
     if (targetElement) {
         // Remove scale class from target element
@@ -250,26 +268,25 @@ function checkWhichSquaresShipIsOn() {
                     overlapped = square.dataset.square;
 
                     // Overlap the next n number of squares to the right
-                    // where n is the number of hits the boat can take
-                    // Get ship object in object array where shipname equals selecte ship name
-                    // Get next square to the right
+                    // where n is the number of hits the boat can take minus one
                     const { hits } = ships.find(ship => ship.name === shipName);
                     const [col, row] = overlapped.match(/[A-Z]+|[0-9]+/g);
-
-                    // console.log(col, row);
+                    const isNextSquares = [];
 
                     for (let i = 0; i < hits - 1; i++) {
-                        // console.log(nextCol);
-
                         const nextCol = legend[legend.indexOf(col) + 1 + i];
                         const nextSquare = document.querySelector(`.square[data-square='${nextCol}${row}']`);
 
-                        console.log(nextSquare);
-
                         if (nextSquare) {
-                            nextSquare.classList.add('is-next-square');
-                            nextSquares.push(nextSquare);
+                            isNextSquares.push(nextSquare);
                         }
+                    }
+
+                    if (isNextSquares.length === (hits - 1)) {
+                        isNextSquares.forEach(square => square.classList.add('is-next-square'));
+                        nextSquares = isNextSquares;
+                    } else {
+                        alert('Illegal moves. Not enough squares.');
                     }
                 }
             }
