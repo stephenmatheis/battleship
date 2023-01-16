@@ -140,8 +140,13 @@ const items = document.querySelectorAll('.ship');
 const gameSquares = document.querySelectorAll('.square:not(.legend)');
 
 items.forEach(item => {
+    // Mouse
     item.addEventListener('mousedown', mousedown);
     item.addEventListener('mouseup', mouseup);
+
+    // Touch
+    item.addEventListener('touchstart', mousedown);
+    item.addEventListener('touchend', mouseup);
 });
 
 function mousedown(event) {
@@ -171,9 +176,13 @@ function mousedown(event) {
     targetElement.style.top = `${top - offsetY}px`;
     targetElement.style.left = `${left - offsetX}px`;
 
-    // Add event listeners
+    // Mouse
     document.addEventListener('mousemove', mousemove);
     window.addEventListener('mouseup', mouseup);
+
+    // Touch
+    document.addEventListener('touchmove', mousemove);
+    window.addEventListener('touchup', mouseup);
 }
 
 function mouseup(event) {
@@ -187,6 +196,8 @@ function mouseup(event) {
 
     // return;
 
+    onDrop();
+
     // Remove selected squares
     for (let square of [...gameSquares]) {
         square.classList.remove('is-overlapped');
@@ -198,9 +209,13 @@ function mouseup(event) {
         nextSquares = [];
     }
 
-    // Remove event listeners
+    // Remove mouse
     document.removeEventListener('mousemove', mousemove);
     window.removeEventListener('mouseup', mouseup);
+
+    // Remove touch
+    document.removeEventListener('touchmove', mousemove);
+    window.removeEventListener('touchend', mouseup);
 
     if (targetElement) {
         // Remove scale class from target element
@@ -265,12 +280,12 @@ function checkWhichSquaresShipIsOn() {
                 if (!overlapped) {
                     console.log(square.dataset.square, 'is overlapped');
                     square.classList.add('is-overlapped');
-                    overlapped = square.dataset.square;
+                    overlapped = square;
 
                     // Overlap the next n number of squares to the right
                     // where n is the number of hits the boat can take minus one
                     const { hits } = ships.find(ship => ship.name === shipName);
-                    const [col, row] = overlapped.match(/[A-Z]+|[0-9]+/g);
+                    const [col, row] = overlapped.dataset.square.match(/[A-Z]+|[0-9]+/g);
                     const isNextSquares = [];
 
                     for (let i = 0; i < hits - 1; i++) {
@@ -295,8 +310,8 @@ function checkWhichSquaresShipIsOn() {
         } else {
             square.classList.remove('is-overlapped');
 
-            if (overlapped === square.dataset.square) {
-                console.log(overlapped, 'is no longer overlapped');
+            if (overlapped && overlapped.dataset.square === square.dataset.square) {
+                console.log(overlapped.dataset.square, 'is no longer overlapped');
                 overlapped = undefined;
 
                 if (nextSquares.length) {
@@ -310,5 +325,24 @@ function checkWhichSquaresShipIsOn() {
 }
 
 async function onDrop(event) {
-    console.log(event);
+    // Don't do anything if it's not a legal move.
+    if (gameBoard.classList.contains('illegal')) {
+        console.log('Illegal move.');
+        
+        return;
+    }
+
+    // Remove the ship without letting it animate back to source
+    targetElement.remove();
+
+    // Disable source
+    sourceElement.classList.add('placed');
+
+    // Add class to squares where ship is dropped
+    const placedOn = [overlapped, ...nextSquares];
+
+    placedOn.forEach(square => {
+        console.log(square);
+        square.classList.add('has-ship');
+    });
 }

@@ -13,7 +13,9 @@ export default function isShipOnSquare(ship, square) {
     //
     // const ship_offsetBottom = ship.offsetTop + 10;
     const ship_offsetBottom = ship.offsetTop + ship.offsetHeight;
-    const ship_offsetRight = ship.offsetLeft + 10;
+    // NOTE: Hard coding 30px might not work on small displays
+    // where the square is not 30px x 30px
+    const ship_offsetRight = ship.offsetLeft + 30;
     // const ship_offsetRight = ship.offsetLeft + ship.offsetWidth;
 
     // Square

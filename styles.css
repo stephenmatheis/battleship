@@ -70,6 +70,10 @@ h2 {
 }
 
 .square.is-next-square {
+    background-color: lightblue;
+}
+
+.square.has-ship {
     background-color: green;
 }
 
@@ -134,8 +138,16 @@ h2 {
     background-color: lightgray;
 }
 
+.ship.placed .hits {
+    background-color: green;
+}
+
 .ship.is-dragging .name {
     color: lightgray;
+}
+
+.ship.placed .name {
+    color: darkgreen;
 }
 
 .ship.is-dragged {
