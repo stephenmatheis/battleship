@@ -128,8 +128,8 @@ ships.forEach(({ name, hits }) => {
 // // DEV:
 
 // Drag and Drop
-let offsetX = 10;
-let offsetY = 10;
+let offsetX = 0; // margin left
+let offsetY = 0; // margin top
 let sourceElement;
 let targetElement;
 let shipName;
@@ -282,11 +282,13 @@ function checkWhichSquaresShipIsOn() {
                         }
                     }
 
+                    isNextSquares.forEach(square => square.classList.add('is-next-square'));
+                    nextSquares = isNextSquares;
+
                     if (isNextSquares.length === (hits - 1)) {
-                        isNextSquares.forEach(square => square.classList.add('is-next-square'));
-                        nextSquares = isNextSquares;
+                        gameBoard.classList.remove('illegal');
                     } else {
-                        alert('Illegal moves. Not enough squares.');
+                        gameBoard.classList.add('illegal');
                     }
                 }
             }
