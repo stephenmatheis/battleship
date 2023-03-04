@@ -146,6 +146,10 @@ h2 {
     color: lightgray;
 }
 
+.ship.placed {
+    cursor: initial;
+}
+
 .ship.placed .name {
     color: darkgreen;
 }

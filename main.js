@@ -338,6 +338,15 @@ async function onDrop(event) {
     // Disable source
     sourceElement.classList.add('placed');
 
+    // Mouse
+    sourceElement.removeEventListener('mousedown', mousedown);
+    sourceElement.removeEventListener('mouseup', mouseup);
+
+    // Touch
+    sourceElement.removeEventListener('touchstart', mousedown);
+    sourceElement.removeEventListener('touchend', mouseup);
+
+
     // Add class to squares where ship is dropped
     const placedOn = [overlapped, ...nextSquares];
 
